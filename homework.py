@@ -37,24 +37,31 @@ HOMEWORK_VERDICTS = {
     'rejected': 'Работа проверена: у ревьюера есть замечания.'
 }
 
-logging.basicConfig(
-    handlers=[
-        RotatingFileHandler(
-            'program.log', maxBytes=50000000, backupCount=5
-        ),
-        logging.StreamHandler(sys.stdout)
-    ],
-    level=logging.DEBUG,
-    format='%(asctime)s, %(levelname)s, %(message)s, %(name)s'
-)
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-handler = logging.StreamHandler(sys.stdout)
-formatter = logging.Formatter(
-    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+
+def init_logger():
+    """Настройки логгера."""
+    logging.basicConfig(
+        handlers=[
+            RotatingFileHandler(
+                'program.log', maxBytes=50000000, backupCount=5
+            ),
+            logging.StreamHandler(sys.stdout)
+        ],
+        level=logging.DEBUG,
+        format='%(asctime)s, %(levelname)s, %(message)s, %(name)s'
+    )
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+    handler = logging.StreamHandler(sys.stdout)
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    return logger
+
+
+logger = init_logger()
 
 
 def check_tokens() -> bool:
@@ -119,8 +126,12 @@ def check_response(response: dict) -> list:
 def parse_status(homework: dict):
     """Отслеживание изменения статуса домашней работы."""
     if 'homework_name' not in homework:
-        logger.error('Ключа homework_name в словаре домашки не обнаружено')
-        raise KeyError('Ключа homework_name в словаре домашки не обнаружено')
+        logger.error(
+            'Ключа homework_name в списке домашних работ не обнаружено'
+        )
+        raise KeyError(
+            'Ключа homework_name в списке домашних работ не обнаружено'
+        )
     homework_name = homework.get('homework_name')
     homework_status = homework.get('status')
     if homework_status not in HOMEWORK_VERDICTS:
@@ -136,6 +147,7 @@ def parse_status(homework: dict):
 
 def main():
     """Основная логика работы бота."""
+    bot = telegram.Bot(token=TELEGRAM_TOKEN)
     if not check_tokens():
         for name in TOKENS.keys():
             message = (
@@ -143,8 +155,9 @@ def main():
                 f'{name}. Программа принудительно остановлена.'
             )
             logger.critical(message)
+            send_message(bot, message)
             raise NotAllTokenException(message)
-    bot = telegram.Bot(token=TELEGRAM_TOKEN)
+        # sys.exit()
     timestamp = int(time.time())
     STATUS = ''
     last_message_error = ''
@@ -159,8 +172,8 @@ def main():
             else:
                 logger.debug('Статус проверки домашней работы не изменился.')
             timestamp = response.get('current_date')
-            """if logger.level == logging.ERROR:
-                send_message(bot, 'logger.error.text!!!!!!!!')"""
+            # if logger.level == logging.ERROR or logging.CRITICAL:
+            # send_message(bot, 'logger.message')
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
             logger.error(message)
