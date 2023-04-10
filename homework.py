@@ -158,7 +158,7 @@ def main():
         logger.critical(message)
         send_message(bot, message)
         sys.exit('Ошибка: Токены не прошли валидацию')
-    timestamp = 0
+    timestamp = int(time.time())
     last_status = ''
     last_message_error = ''
     while True:
@@ -176,7 +176,7 @@ def main():
                     )
             else:
                 logger.info('Нет домашних работ')
-            # timestamp = response.get('current_date')
+            timestamp = response.get('current_date')
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
             logger.error(message)
