@@ -70,13 +70,13 @@ logger = init_logger()
 def check_tokens() -> bool:
     """Проверяет доступность переменных окружения."""
     for token_name in TOKENS:
-            if not all([PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID]):
-                message = (
-                    f'Отсутствует обязательная переменная окружения: '
-                    f'{token_name}. Программа принудительно остановлена.'
-                )
-                logger.critical(message)
-                return False
+        if not all([PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID]):
+            message = (
+                f'Отсутствует обязательная переменная окружения: '
+                f'{token_name}. Программа принудительно остановлена.'
+            )
+            logger.critical(message)
+            return False
     return True
 
 
