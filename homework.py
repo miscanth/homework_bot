@@ -1,19 +1,17 @@
-from http import HTTPStatus
-from json import decoder
 import logging
-from logging.handlers import RotatingFileHandler
 import os
 import sys
 import time
+from http import HTTPStatus
+from json import decoder
+from logging.handlers import RotatingFileHandler
 
-from dotenv import load_dotenv
 import requests
 import telegram
+from dotenv import load_dotenv
 
-from exceptions import (
-    UnavaliableEndpointException,
-    TelegramErrorException, JSONDecodeErrorException
-)
+from exceptions import (JSONDecodeErrorException, TelegramErrorException,
+                        UnavaliableEndpointException)
 
 load_dotenv()
 
@@ -71,7 +69,15 @@ logger = init_logger()
 
 def check_tokens() -> bool:
     """Проверяет доступность переменных окружения."""
-    return all([PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID])
+    for token_name in TOKENS:
+            if not all([PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID]):
+                message = (
+                    f'Отсутствует обязательная переменная окружения: '
+                    f'{token_name}. Программа принудительно остановлена.'
+                )
+                logger.critical(message)
+                return False
+    return True
 
 
 def send_message(bot, message: str) -> None:
@@ -131,30 +137,28 @@ def parse_status(homework: dict):
             'Ключа homework_name в списке домашних работ не обнаружено'
         )
     homework_name = homework.get('homework_name')
-    homework_status = homework.get('status')
-    if homework_status not in HOMEWORK_VERDICTS:
+    status = homework.get('status')
+    if status not in HOMEWORK_VERDICTS:
         raise KeyError('Передан неверный ключ для статуса')
-    for status in HOMEWORK_VERDICTS.keys():
-        if homework_status == status:
-            return (
-                f'Изменился статус проверки работы '
-                f'"{homework_name}". {HOMEWORK_VERDICTS[status]}'
-            )
+    else:
+        return (
+            f'Изменился статус проверки работы '
+            f'"{homework_name}". {HOMEWORK_VERDICTS[status]}'
+        )
 
 
 def main():
     """Основная логика работы бота."""
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     if not check_tokens():
-        for name in TOKENS.keys():
-            message = (
-                f'Отсутствует обязательная переменная окружения: '
-                f'{name}. Программа принудительно остановлена.'
-            )
-            logger.critical(message)
-            send_message(bot, message)
-            sys.exit('Ошибка: Токены не прошли валидацию')
-    timestamp = int(time.time())
+        message = (
+            'Отсутствует обязательная переменная окружения. '
+            'Программа принудительно остановлена.'
+        )
+        logger.critical(message)
+        send_message(bot, message)
+        sys.exit('Ошибка: Токены не прошли валидацию')
+    timestamp = 0
     last_status = ''
     last_message_error = ''
     while True:
@@ -172,7 +176,7 @@ def main():
                     )
             else:
                 logger.info('Нет домашних работ')
-            timestamp = response.get('current_date')
+            # timestamp = response.get('current_date')
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
             logger.error(message)
