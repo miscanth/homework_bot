@@ -140,23 +140,16 @@ def parse_status(homework: dict):
     status = homework.get('status')
     if status not in HOMEWORK_VERDICTS:
         raise KeyError('Передан неверный ключ для статуса')
-    else:
-        return (
-            f'Изменился статус проверки работы '
-            f'"{homework_name}". {HOMEWORK_VERDICTS[status]}'
-        )
+    return (
+        f'Изменился статус проверки работы '
+        f'"{homework_name}". {HOMEWORK_VERDICTS[status]}'
+    )
 
 
 def main():
     """Основная логика работы бота."""
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     if not check_tokens():
-        message = (
-            'Отсутствует обязательная переменная окружения. '
-            'Программа принудительно остановлена.'
-        )
-        logger.critical(message)
-        send_message(bot, message)
         sys.exit('Ошибка: Токены не прошли валидацию')
     timestamp = int(time.time())
     last_status = ''
