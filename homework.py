@@ -151,7 +151,7 @@ def main():
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     if not check_tokens():
         sys.exit('Ошибка: Токены не прошли валидацию')
-    timestamp = int(time.time())
+    timestamp = 0
     last_status = ''
     last_message_error = ''
     while True:
