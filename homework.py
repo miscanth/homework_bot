@@ -137,12 +137,14 @@ def parse_status(homework: dict):
             'Ключа homework_name в списке домашних работ не обнаружено'
         )
     homework_name = homework.get('homework_name')
+    reviewer_comment = homework.get('reviewer_comment')
     status = homework.get('status')
     if status not in HOMEWORK_VERDICTS:
         raise KeyError('Передан неверный ключ для статуса')
     return (
         f'Изменился статус проверки работы '
-        f'"{homework_name}". {HOMEWORK_VERDICTS[status]}'
+        f'"{homework_name}". {HOMEWORK_VERDICTS[status]}\n'
+        f'{reviewer_comment}'
     )
 
 
