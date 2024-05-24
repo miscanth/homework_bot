@@ -18,7 +18,7 @@ load_dotenv()
 
 PRACTICUM_TOKEN = os.getenv('P_TOKEN')
 TELEGRAM_TOKEN = os.getenv('T_TOKEN')
-TELEGRAM_CHAT_ID = 242577505
+TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 MAX_BYTES = 50000000
 BACKUP_COUNT = 5
 
@@ -137,12 +137,14 @@ def parse_status(homework: dict):
             'Ключа homework_name в списке домашних работ не обнаружено'
         )
     homework_name = homework.get('homework_name')
+    reviewer_comment = homework.get('reviewer_comment')
     status = homework.get('status')
     if status not in HOMEWORK_VERDICTS:
         raise KeyError('Передан неверный ключ для статуса')
     return (
         f'Изменился статус проверки работы '
-        f'"{homework_name}". {HOMEWORK_VERDICTS[status]}'
+        f'"{homework_name}". {HOMEWORK_VERDICTS[status]}\n'
+        f'{reviewer_comment}'
     )
 
 
@@ -151,7 +153,7 @@ def main():
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     if not check_tokens():
         sys.exit('Ошибка: Токены не прошли валидацию')
-    timestamp = int(time.time())
+    timestamp = 0
     last_status = ''
     last_message_error = ''
     while True:
