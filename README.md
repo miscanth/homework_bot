@@ -58,7 +58,7 @@ pip install -r requirements.txt
 ```
 Запустить проект:
 ```
-python3.9 manage.py homework.py
+python3.9 homework.py
 ```
 
 ## Разработчик (исполнитель):
